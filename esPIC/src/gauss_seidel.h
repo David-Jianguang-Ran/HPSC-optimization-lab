@@ -54,7 +54,11 @@ void GS_or_Jacobi(int max_iter , VD RHS, VD &Solution , mpiInfo &myMPI , int GSo
     
     converged = 0;
 
-    
+
+    // OPTIMIZATION HERE
+    // cache inverse of diag
+
+
     while ( converged == 0 )
       {
 	// ----------------------------------------------
@@ -78,7 +82,9 @@ void GS_or_Jacobi(int max_iter , VD RHS, VD &Solution , mpiInfo &myMPI , int GSo
 	// ----------------------------------------------
 	// (3) One Jacobi Iteration
 	// ----------------------------------------------
-	
+
+
+
 	rLOOP
 	  {
 
@@ -86,8 +92,16 @@ void GS_or_Jacobi(int max_iter , VD RHS, VD &Solution , mpiInfo &myMPI , int GSo
 	    // (3.1) Compute new guess for row r
 
 	    newval = b[r];
-	    for ( int c = 2 ; c <= bandwidth ; ++c ) newval -=  Acoef[r][c] * Solution[Jcoef[r][c]];
-	    newval /= Acoef[r][1];
+	    // for ( int c = 2 ; c <= bandwidth ; ++c ) newval -=  Acoef[r][c] * Solution[Jcoef[r][c]];
+	    auto a_iter = Acoef[r].cbegin() + 2;
+        auto j_iter = Jcoef[r].cbegin() + 2;
+        int c;
+        for ( c = 2 ; c <= bandwidth ; ++c ) {
+            newval -= *a_iter * Solution[*j_iter];
+            ++a_iter;
+            ++j_iter;
+        };
+        newval /= *(Acoef[r].cbegin() + 1) ;
 
 	    // (3.2) Convergence check
 
@@ -103,7 +117,10 @@ void GS_or_Jacobi(int max_iter , VD RHS, VD &Solution , mpiInfo &myMPI , int GSo
 	      
 	  }
 
-	rLOOP Solution[r] = SolutionNew[r];
+      // OPTIMIZATION HERE
+	// rLOOP Solution[r] = SolutionNew[r];
+    // instead of vector to vector copy, do swap or something
+    Solution.swap(NewSolution);
 
 	// ----------------------------------------------
 	// (4) Make note of the convergence state
@@ -116,8 +133,9 @@ void GS_or_Jacobi(int max_iter , VD RHS, VD &Solution , mpiInfo &myMPI , int GSo
 	// ----------------------------------------------
 
 	int root = 0;
-	err = MPI_Reduce( &converged       , &global_converged, one , MPI_INT , MPI_MIN , zero , MPI_COMM_WORLD );
-	err = MPI_Bcast ( &global_converged,                    one , MPI_INT,            zero , MPI_COMM_WORLD );
+    // OPTIMIZATION HERE
+    // using one MPI all reduce call instead of reduce and bcast
+	err = MPI_Allreduce( &converged       , &global_converged, one , MPI_INT , MPI_MIN , MPI_COMM_WORLD );
 	converged = global_converged;
 
 	if ( converged == 1 )
