@@ -28,14 +28,8 @@
 
 # Default compiler is Intel MPI compiler
 
-COMPILER := mpicc
+COMPILER := mpicxx
 UBUNTU   := ubuntu
-
-# Change if on ubuntu
-
-ifeq ($(strip $(LOGNAME)),scott)
-COMPILER := mpic++ 
-endif
 
 # -----------------------------------------------------
 # Make esPIC
@@ -43,5 +37,7 @@ endif
 
 
 esPIC: esPIC.cpp esPIC.h gauss_seidel.h plotter.h mpiInfo.h particles.h particle_plotter.h LaplacianOnGrid.h
-	$(COMPILER) esPIC.cpp -g -o esPIC -std=c++11 -fopenmp
+	$(COMPILER) esPIC.cpp -Wextra -og -g -o esPIC -std=c++11 -fopenmp
+	cp esPIC ../run
+	cp esPIC ../slurm
 

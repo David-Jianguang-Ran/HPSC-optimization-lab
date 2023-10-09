@@ -46,6 +46,7 @@ int main(int argc, char *argv[])
    int nPEx, nPEy, nCellx, nCelly, nPtcl ;
    double tEnd, dt, tPlot;
    double flux;
+   bool noPlot = false;
 
 
     if ( myMPI.myPE == 0 )
@@ -75,6 +76,7 @@ int main(int argc, char *argv[])
        if ( !strcmp(argv[count],"-tEnd"    ) ) tEnd   = atof(argv[count+1]);
        if ( !strcmp(argv[count],"-dt"      ) ) dt     = atof(argv[count+1]);
        if ( !strcmp(argv[count],"-tPlot"   ) ) tPlot  = atof(argv[count+1]);
+       if ( !strcmp(argv[count],"-noPlot"   ) ) noPlot = true;
      }
 
    if ( myMPI.myPE == 0 )
@@ -170,11 +172,13 @@ int main(int argc, char *argv[])
        if ( timeSinceLastPlot >= tPlot )
 	 {
 	   if ( myMPI.myPE == 0 ) cout << "Plotting output at time = " << t << " Latest matrix solver iteration count = " << latestIterCount << endl;
-	   PTCL.plot( "ptcl" ,            count , myMPI.myPE );
-	   MESH.plot( "mesh" , MESH.Qval, count , myMPI      );
-	   MESH.plot( "phi"  , MESH.phi , count , myMPI      );
+	   if (!noPlot) {
+           PTCL.plot( "ptcl" ,            count , myMPI.myPE );
+           MESH.plot( "mesh" , MESH.Qval, count , myMPI      );
+           MESH.plot( "phi"  , MESH.phi , count , myMPI      );
+           ++count;
+       }
 	   timeSinceLastPlot = 0.;
-	   ++count;
 	 }
      }
 
