@@ -1,6 +1,7 @@
 
-sbatch --export=CODE='/home/scru5660/HPSC/codes/fd_mpi/src' ../slurm/ex01.bat 
 
-clear ; squeue -u scru5660 -i 5
+# we are only keeping one
+mpirun -n 4 valgrind --tool=cachegrind --cachegrind-out-file="cachegrind.original.out" ./esPIC-original -nPEx 2 -nPEy 2 -nCellx 10 -nCelly 10 -nPtcl 50000  -flux 200  -tEnd 1 -dt .01 -tPlot .2 -noPlot
+mpirun -n 4 valgrind --tool=callgrind --callgrind-out-file="callgrind.original.out" ./esPIC-original -nPEx 2 -nPEy 2 -nCellx 10 -nCelly 10 -nPtcl 50000  -flux 200  -tEnd 1 -dt .01 -tPlot .2 -noPlot
 
-
+callgrind_annotate --auto=yes cachegrind.original.out >  cachegrind.original.txt
