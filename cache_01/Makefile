@@ -8,5 +8,7 @@ main: main.cpp Makefile main.h
 	mpicxx -g main.cpp -o main -std=c++11
 #	g++ -fopenmp main.cpp -o main
 
+test-array-class:
+	gcc -g test-my-array.cpp -o test-my-array -lstdc++
 
 

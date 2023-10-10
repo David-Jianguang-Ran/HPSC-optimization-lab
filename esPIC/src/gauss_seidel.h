@@ -120,7 +120,7 @@ void GS_or_Jacobi(int max_iter , VD RHS, VD &Solution , mpiInfo &myMPI , int GSo
       // OPTIMIZATION HERE
 	// rLOOP Solution[r] = SolutionNew[r];
     // instead of vector to vector copy, do swap or something
-    Solution.swap(NewSolution);
+    Solution.swap(SolutionNew);
 
 	// ----------------------------------------------
 	// (4) Make note of the convergence state
