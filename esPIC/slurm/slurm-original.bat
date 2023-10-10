@@ -6,7 +6,7 @@
 # -
 
 #SBATCH --nodes=1
-#SBATCH --ntasks=6
+#SBATCH --ntasks=10
 #SBATCH --time=00:30:00
 #SBATCH --partition=amilan
 #SBATCH --output=slurm-original-run-%j.out

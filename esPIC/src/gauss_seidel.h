@@ -58,8 +58,8 @@ void GS_or_Jacobi(int max_iter , VD RHS, VD &Solution , mpiInfo &myMPI , int GSo
 
 
     // OPTIMIZATION HERE
-    // cache inverse of diag in the unused space in the beginning of each row
-    rLOOP Acoef.at(r, 0) = 1.0 / Acoef.at(r, 1);
+    // cache inverse of diag in the unused space in the end of each row
+    rLOOP Acoef.at(r, bandwidth + 1) = 1.0 / Acoef.at(r, 1);
 
 
     while ( converged == 0 )
@@ -96,14 +96,14 @@ void GS_or_Jacobi(int max_iter , VD RHS, VD &Solution , mpiInfo &myMPI , int GSo
 
 	    newval = b[r];
         // OPTIMIZATION using ContiguousArray class
-        double* a_addr = Acoef.get_addr(r, 2);
-        int* j_addr = Jcoef.get_addr(r, 2);
+        double* a_ptr = Acoef.get_ptr(r, 2);
+        int* j_ptr = Jcoef.get_ptr(r, 2);
         for (int c = 2; c <= bandwidth; ++c) {
-            newval -= *a_addr * Solution[*j_addr];
-            ++a_addr;
-            ++j_addr;
+            newval -= *a_ptr * Solution[*j_ptr];
+            ++a_ptr;
+            ++j_ptr;
         }
-        newval *= *(a_addr - bandwidth - 1);
+        newval *= *(a_ptr);
 
 	    // (3.2) Convergence check
 

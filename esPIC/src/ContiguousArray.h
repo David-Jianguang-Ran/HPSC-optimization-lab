@@ -22,7 +22,7 @@ public:
     ~Contiguous2DArray();
 
     // for iterating over continuous ranges, like an iterator
-    inline DT* get_addr(int x, int y);
+    inline DT* get_ptr(int x, int y);
     // for single element access
     inline DT& at(int x, int y);
 
@@ -64,7 +64,7 @@ Contiguous2DArray<DT>::~Contiguous2DArray() {
 }
 
 template <typename DT>
-inline DT* Contiguous2DArray<DT>::get_addr(int y, int x) {
+inline DT* Contiguous2DArray<DT>::get_ptr(int y, int x) {
     return this->content + (y - 1) * this->x_max + (x - 1);
 }
 

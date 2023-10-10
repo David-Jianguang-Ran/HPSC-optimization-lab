@@ -172,19 +172,19 @@ public:
       jLOOP    // That is why we can loop all the from 1 to nRealx and 1 to nRealy.
       {
 	int p = pid(i,j);
-    double* a_1_addr = Acoef.at(p, 1);
-    *a_1_addr = -2./dx2 - 2./dy2;
-    *(a_1_addr + 1) =  1./dx2;
-    *(a_1_addr + 2) =  1./dx2;
-    *(a_1_addr + 3) =  1./dy2;
-    *(a_1_addr + 4) =  1./dy2;
+    double* a_1_ptr = Acoef.get_ptr(p, 1);
+    *a_1_ptr = -2./dx2 - 2./dy2;
+    *(a_1_ptr + 1) =  1./dx2;
+    *(a_1_ptr + 2) =  1./dx2;
+    *(a_1_ptr + 3) =  1./dy2;
+    *(a_1_ptr + 4) =  1./dy2;
 
-    int* j_1_addr = Jcoef.at(p, 1);
-	*j_1_addr =  pid( i  , j  );
-    *(j_1_addr + 1) =  pid( i+1, j  );
-    *(j_1_addr + 2) =  pid( i-1, j  );
-    *(j_1_addr + 3) =  pid( i  , j+1);
-    *(j_1_addr + 4) =  pid( i  , j-1);
+    int* j_1_ptr = Jcoef.get_ptr(p, 1);
+	*j_1_ptr =  pid( i  , j  );
+    *(j_1_ptr + 1) =  pid( i+1, j  );
+    *(j_1_ptr + 2) =  pid( i-1, j  );
+    *(j_1_ptr + 3) =  pid( i  , j+1);
+    *(j_1_ptr + 4) =  pid( i  , j-1);
 	
       }
 
