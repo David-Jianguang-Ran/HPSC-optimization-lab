@@ -76,6 +76,7 @@
 //  0,0                              4,0
 //
 
+#include "ContiguousArray.h"
 
 //  ==
 //  ||
@@ -92,8 +93,12 @@ public:
   VD x,y;
   int nRealx    , nRealy   , nField;
   double dx, dy;
-  VDD Acoef;
-  VII Jcoef ;
+  // OPTIMIZATION
+  // replacing vector of vector with our own array class
+  //VDD Acoef;
+  //VII Jcoef ;
+  Contiguous2DArray<double> Acoef;
+  Contiguous2DArray<int> Jcoef;
   VD  phi ;  VD  b ;
   int bandwidth;
   int myPE;
@@ -132,9 +137,13 @@ public:
 	}
 
     bandwidth = 5;
-    
-    Acoef.resize(nField+1 ); rLOOP Acoef[r].resize(bandwidth+1);
-    Jcoef.resize(nField+1 ); rLOOP Jcoef[r].resize(bandwidth+1);
+
+    // OPTIMIZATION using ContiguousArray
+    // Acoef.resize(nField+1 ); rLOOP Acoef[r].resize(bandwidth+1);
+    // Jcoef.resize(nField+1 ); rLOOP Jcoef[r].resize(bandwidth+1);
+    Acoef = Contiguous2DArray<double>(bandwidth + 1, nField + 1, true);
+    Jcoef = Contiguous2DArray<int>(bandwidth + 1, nField + 1, true);
+
     b.resize(nField+1 );
     phi.resize(nField+1);
 
@@ -152,10 +161,8 @@ public:
 
   void FormLS(mpiInfo &myMPI)
   {
-    
-    rLOOP cLOOP Acoef[r][c] = 0.;  // Initialize linear system
-    rLOOP cLOOP Jcoef[r][c] = 0.;  //
-    rLOOP       Jcoef[r][1] = r;   //
+
+    rLOOP       Jcoef.at(r, 1) = r;   //
     rLOOP b[r] = 0.;
     
     double dx2 = dx*dx;           // Form matrix entries for the interior grid points
@@ -165,17 +172,19 @@ public:
       jLOOP    // That is why we can loop all the from 1 to nRealx and 1 to nRealy.
       {
 	int p = pid(i,j);
-	Acoef[ p ][ 1 ] = -2./dx2 - 2./dy2;
-	Acoef[ p ][ 2 ] =  1./dx2;
-	Acoef[ p ][ 3 ] =  1./dx2;
-	Acoef[ p ][ 4 ] =  1./dy2;
-	Acoef[ p ][ 5 ] =  1./dy2;
+    double* a_1_addr = Acoef.at(p, 1);
+    *a_1_addr = -2./dx2 - 2./dy2;
+    *(a_1_addr + 1) =  1./dx2;
+    *(a_1_addr + 2) =  1./dx2;
+    *(a_1_addr + 3) =  1./dy2;
+    *(a_1_addr + 4) =  1./dy2;
 
-	Jcoef[ p ][ 1 ] =  pid( i  , j  );
-	Jcoef[ p ][ 2 ] =  pid( i+1, j  );
-	Jcoef[ p ][ 3 ] =  pid( i-1, j  );
-	Jcoef[ p ][ 4 ] =  pid( i  , j+1);
-	Jcoef[ p ][ 5 ] =  pid( i  , j-1);
+    int* j_1_addr = Jcoef.at(p, 1);
+	*j_1_addr =  pid( i  , j  );
+    *(j_1_addr + 1) =  pid( i+1, j  );
+    *(j_1_addr + 2) =  pid( i-1, j  );
+    *(j_1_addr + 3) =  pid( i  , j+1);
+    *(j_1_addr + 4) =  pid( i  , j-1);
 	
       }
 
@@ -228,8 +237,8 @@ public:
       for ( int j = jMin ; j <= jMax ; ++j )
 	{
 	  int p = pid(i,j);
-	  cLOOP Acoef[p][c] = 0.;
-	  Acoef[ p ] [ 1 ] = 1. ;  b[ p ] =  phiValues[count];
+	  cLOOP Acoef.at(p, c) = 0.;
+	  Acoef.at( p, 1 ) = 1. ;  b[ p ] =  phiValues[count];
 	  ++count;
 	}
 
@@ -243,13 +252,13 @@ public:
 	{
 	  int p  = pid(i,j);
 	  int p2 = pid(i+dirx,j+diry);
-	  
-	  cLOOP Acoef[p][c] = 0.;
-	  
-	  Acoef[ p ] [ 1 ] = 1. ;
+
+      cLOOP Acoef.at(p, c) = 0.;
+
+      Acoef.at( p, 1 ) = 1. ;
 
 	  for ( int k = 1 ; k <= bandwidth ; ++k )
-	    if ( Jcoef[p][k] == pid(i+dirx,j+diry) ) Acoef[ p ] [ k ] = -1.;
+	    if ( Jcoef.at(p, k) == pid(i+dirx,j+diry) ) Acoef.at( p, k ) = -1.;
 
 	  b[ p ] = 0.;
 	}

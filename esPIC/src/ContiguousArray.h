@@ -17,6 +17,7 @@ public:
     int x_max;
     int y_max;
 
+    Contiguous2DArray();
     Contiguous2DArray(int x_max, int y_max, bool zero_out = false);
     ~Contiguous2DArray();
 
@@ -42,6 +43,12 @@ public:
 
 
 // implementations
+
+template <typename DT>
+Contiguous2DArray<DT>::Contiguous2DArray() {
+    // fake constructor, make sure to really do it later
+}
+
 template <typename DT>
 Contiguous2DArray<DT>::Contiguous2DArray(int x_max, int y_max, bool zero_out) {
     this->content = new DT[x_max * y_max];
@@ -57,12 +64,12 @@ Contiguous2DArray<DT>::~Contiguous2DArray() {
 }
 
 template <typename DT>
-inline DT* Contiguous2DArray<DT>::get_addr(int x, int y) {
+inline DT* Contiguous2DArray<DT>::get_addr(int y, int x) {
     return this->content + (y - 1) * this->x_max + (x - 1);
 }
 
 template <typename DT>
-inline DT& Contiguous2DArray<DT>::at(int x, int y) {
+inline DT& Contiguous2DArray<DT>::at(int y, int x) {
     return this->content[(y - 1) * this->x_max + (x - 1)];
 }
 

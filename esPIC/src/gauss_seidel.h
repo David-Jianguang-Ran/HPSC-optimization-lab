@@ -19,6 +19,8 @@
 //  ||                                                                            ||
 //  ================================================================================
 
+#include "ContiguousArray.h"
+
   //  ==
   //  ||
   //  ||  Perform Jacobiiterations on nField X nField linear
@@ -56,7 +58,8 @@ void GS_or_Jacobi(int max_iter , VD RHS, VD &Solution , mpiInfo &myMPI , int GSo
 
 
     // OPTIMIZATION HERE
-    // cache inverse of diag
+    // cache inverse of diag in the unused space in the beginning of each row
+    rLOOP Acoef.at(r, 0) = 1.0 / Acoef.at(r, 1);
 
 
     while ( converged == 0 )
@@ -92,16 +95,15 @@ void GS_or_Jacobi(int max_iter , VD RHS, VD &Solution , mpiInfo &myMPI , int GSo
 	    // (3.1) Compute new guess for row r
 
 	    newval = b[r];
-	    // for ( int c = 2 ; c <= bandwidth ; ++c ) newval -=  Acoef[r][c] * Solution[Jcoef[r][c]];
-	    auto a_iter = Acoef[r].cbegin() + 2;
-        auto j_iter = Jcoef[r].cbegin() + 2;
-        int c;
-        for ( c = 2 ; c <= bandwidth ; ++c ) {
-            newval -= *a_iter * Solution[*j_iter];
-            ++a_iter;
-            ++j_iter;
-        };
-        newval /= *(Acoef[r].cbegin() + 1) ;
+        // OPTIMIZATION using ContiguousArray class
+        double* a_addr = Acoef.get_addr(r, 2);
+        int* j_addr = Jcoef.get_addr(r, 2);
+        for (int c = 2; c <= bandwidth; ++c) {
+            newval -= *a_addr * Solution[*j_addr];
+            ++a_addr;
+            ++j_addr;
+        }
+        newval *= *(a_addr - bandwidth - 1);
 
 	    // (3.2) Convergence check
 
