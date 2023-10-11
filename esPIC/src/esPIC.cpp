@@ -146,7 +146,7 @@ int main(int argc, char *argv[])
 
        // Inject particles
        
-       if ( myMPI.iPE == 0 ) PTCL.addFlux( t , MESH.y0, MESH.y1, density, vx_bdy , vy_bdy );
+       // if ( myMPI.iPE == 0 ) PTCL.addFlux( t , MESH.y0, MESH.y1, density, vx_bdy , vy_bdy );
 
        // Move particles
        
@@ -154,7 +154,7 @@ int main(int argc, char *argv[])
 
        // Map between particles and the mesh
 
-       MESH.ParticlesOnMesh(PTCL,myMPI);
+       // MESH.ParticlesOnMesh(PTCL,myMPI);
 
        // Solve Poisson Equation
 

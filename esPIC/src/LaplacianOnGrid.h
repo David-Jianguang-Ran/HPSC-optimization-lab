@@ -76,6 +76,7 @@
 //  0,0                              4,0
 //
 
+#include "debug_utils.h"
 
 //  ==
 //  ||
@@ -220,8 +221,12 @@ public:
     // if ( myMPI.iPE  == myMPI.nPEx-1  ) ApplyBCs(  nRealx ,   nRealx   ,   0      , nRealy+1   , phiR);
     // if ( myMPI.jPE  == 0             ) ApplyNeumannBCs(  0      ,   nRealx+1 ,   1      , 1          ,  0 ,   1 );
     // if ( myMPI.jPE  == myMPI.nPEy-1  ) ApplyNeumannBCs(  0      ,   nRealx+1 ,   nRealy , nRealy     ,  0 ,  -1 );
-    
-      
+
+      print_2d(Acoef, "Acoef");
+      print_2d(Jcoef, "Jcoef");
+
+      print_as_2d(b, "b", nRealx);
+      print_as_2d(phi, "phi", nRealx);
   }
 
   void ApplyBCs(int iMin, int iMax , int jMin, int jMax, VD &phiValues)
