@@ -136,8 +136,10 @@ public:
     Acoef.resize(nField+1 ); rLOOP Acoef[r].resize(bandwidth+1);
     Jcoef.resize(nField+1 ); rLOOP Jcoef[r].resize(bandwidth+1);
 
-    b.resize(nField + 1 + nrealy % 2 ? 0 : nRealx + 2);
-    phi.resize(nField + 1 + nrealy % 2 ? 0 : nRealx + 2);
+    // OPTIMIZATION alternate physical node storage scheme
+    // need padding when row numbers are not even
+    b.resize(nField + 1 + (ncell_y % 2 ? 0 : nRealx + 2));
+    phi.resize(nField + 1 + (ncell_y % 2 ? 0 : nRealx + 2));
 
     rLOOP phi[r] = 0.;
     
@@ -438,19 +440,18 @@ public:
   //  ==
 
   // OPTIMIZATION alternate physical node storage scheme
-  // 21, 23, 25, 27, 29   < extra row needed for padding
-  // 20, 22, 24, 26, 28,
+  // 22, 24, 26, 28, 30, < extra row needed for padding
+  // 21, 23, 25, 27, 29,
+  // 12, 14, 16, 18, 20,
   // 11, 13, 15, 17, 19,
-  // 10, 12, 14, 16, 18,  < every two rows are grouped together
-  //  1,  3,  5,  7,  9,
-  //  0,  2,  4,  6,  8,  < one of top and bottom neighbor will be close in array
+  //  2,  4,  6,  8, 10, < every two rows are grouped together
+  //  1,  3,  5,  7,  9, <
   //
   // int pid(int i,int j) { return (i+1) + (j)*(nRealx+2);}   // Given i-j, return point ID.  Here i-j is the physical grid.
                                                            // The row/col numbers must include the candy-coating.
-  int pid(int i, int j ) {
-      return  j % 2 + (j / 2) * 2 * (nRealx + 2) + i * 2;
+  inline int pid(int i, int j ) {
+      return  j % 2 + (j / 2) * 2 * (nRealx + 1) + i * 2 + 1;
       }
-  }
   #include "plotter.h"
   #include "gauss_seidel.h"
 };

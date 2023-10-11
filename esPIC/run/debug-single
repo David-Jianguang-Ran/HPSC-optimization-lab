@@ -1,0 +1,2 @@
+break LaplacianOnGrid.h:214
+run -nPEx 1 -nPEy 1 -nCellx 3 -nCelly 3 -nPtcl 100000  -flux 10  -tEnd 1 -dt .01 -tPlot .2 -noPlot
