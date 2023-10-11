@@ -139,8 +139,8 @@ public:
 
     // OPTIMIZATION alternate physical node storage scheme
     // need padding when row numbers are not even
-    b.resize(nField + 1 + (ncell_y % 2 ? 0 : nRealx + 2));
-    phi.resize(nField + 1 + (ncell_y % 2 ? 0 : nRealx + 2));
+    b.resize(nField + 1 + (ncell_y % 2 ? nRealx + 2 : 0));
+    phi.resize(nField + 1 + (ncell_y % 2 ? nRealx + 2 : 0));
 
     rLOOP phi[r] = 0.;
     
@@ -225,8 +225,8 @@ public:
       print_2d(Acoef, "Acoef");
       print_2d(Jcoef, "Jcoef");
 
-      print_as_2d(b, "b", nRealx);
-      print_as_2d(phi, "phi", nRealx);
+      print_as_2d(b, "b", nRealx + 1);
+      print_as_2d(phi, "phi", nRealx + 1);
   }
 
   void ApplyBCs(int iMin, int iMax , int jMin, int jMax, VD &phiValues)
