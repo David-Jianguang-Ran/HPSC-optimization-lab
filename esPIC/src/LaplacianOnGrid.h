@@ -100,6 +100,9 @@ public:
   int myPE;
   VD Qval;
 
+  // OPTIMIZATION alternate physical node storage scheme
+  int phi_len_padded;
+
   //  ==
   //  ||
   //  ||  Constructor:  Initialize values
@@ -133,16 +136,21 @@ public:
 	}
 
     bandwidth = 5;
-    
-    Acoef.resize(nField+1 ); rLOOP Acoef[r].resize(bandwidth+1);
-    Jcoef.resize(nField+1 ); rLOOP Jcoef[r].resize(bandwidth+1);
 
     // OPTIMIZATION alternate physical node storage scheme
     // need padding when row numbers are not even
-    b.resize(nField + 1 + (ncell_y % 2 ? nRealx + 2 : 0));
-    phi.resize(nField + 1 + (ncell_y % 2 ? nRealx + 2 : 0));
+    phi_len_padded = nField + 1 + (nRealy % 2 ? nRealx + 2 : 0);
+    b.resize(phi_len_padded);
+    phi.resize(phi_len_padded);
 
-    rLOOP phi[r] = 0.;
+    Acoef.resize(phi_len_padded);
+    Jcoef.resize(phi_len_padded);
+
+    for (int r = 1; r < phi_len_padded; ++r) {
+        Acoef[r].resize(bandwidth+1);
+        Jcoef[r].resize(bandwidth+1);
+        phi[r] = 0.;
+    }
     
     myPE = myMPI.myPE;
 
@@ -157,14 +165,24 @@ public:
   void FormLS(mpiInfo &myMPI)
   {
     
-    rLOOP cLOOP Acoef[r][c] = 0.;  // Initialize linear system
-    rLOOP cLOOP Jcoef[r][c] = 0.;  //
-    rLOOP       Jcoef[r][1] = r;   //
-    rLOOP b[r] = 0.;
+    // Initialize linear system under the new storage scheme
+    for (int r = 1; r < phi_len_padded; ++r) {
+        cLOOP {
+            Acoef[r][c] = 0.;
+            Jcoef[r][c] = 0.;
+        }
+        Jcoef[r][1] = r;
+        b[r] = 0.;
+    }
     
     double dx2 = dx*dx;           // Form matrix entries for the interior grid points
     double dy2 = dy*dy;           // Form matrix entries for the interior grid points
-    
+
+    // Populate RHS must happen matrix set up so only rows corresponding to valid mesh nodes are populated
+
+    double c1 = 10.;
+    double c2 = 10.;
+
     iLOOP      // A*phi = b has extra rows and columns to accommodate nodes outside the physical domain.
       jLOOP    // That is why we can loop all the from 1 to nRealx and 1 to nRealy.
       {
@@ -180,15 +198,10 @@ public:
 	Jcoef[ p ][ 3 ] =  pid( i-1, j  );
 	Jcoef[ p ][ 4 ] =  pid( i  , j+1);
 	Jcoef[ p ][ 5 ] =  pid( i  , j-1);
-	
+
+    b[p] = -( -c1*Qval[p] + c2*phi[p] );
       }
 
-    // Populate RHS
-
-    double c1 = 10.;
-    double c2 = 10.;
-
-    rLOOP b[r] = -( -c1*Qval[r] + c2*phi[r] );
 
     // Populate arrays, one for each side, containing the Dirichlet BCs
 
@@ -222,11 +235,12 @@ public:
     // if ( myMPI.jPE  == 0             ) ApplyNeumannBCs(  0      ,   nRealx+1 ,   1      , 1          ,  0 ,   1 );
     // if ( myMPI.jPE  == myMPI.nPEy-1  ) ApplyNeumannBCs(  0      ,   nRealx+1 ,   nRealy , nRealy     ,  0 ,  -1 );
 
-      print_2d(Acoef, "Acoef");
-      print_2d(Jcoef, "Jcoef");
-
-      print_as_2d(b, "b", nRealx + 1);
-      print_as_2d(phi, "phi", nRealx + 1);
+    // DEBUG PRINT
+//      print_2d(Acoef, "Acoef");
+//      print_2d(Jcoef, "Jcoef");
+//
+//      print_as_2d(b, "b", nRealx + 1);
+//      print_as_2d(phi, "phi", nRealx + 1);
   }
 
   void ApplyBCs(int iMin, int iMax , int jMin, int jMax, VD &phiValues)

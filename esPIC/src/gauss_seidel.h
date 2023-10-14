@@ -78,8 +78,8 @@ void GS_or_Jacobi(int max_iter , VD RHS, VD &Solution , mpiInfo &myMPI , int GSo
 	// ----------------------------------------------
 	// (3) One Jacobi Iteration
 	// ----------------------------------------------
-	
-	rLOOP
+
+    for (int r = 1; r < phi_len_padded; ++r)
 	  {
 
 	    
