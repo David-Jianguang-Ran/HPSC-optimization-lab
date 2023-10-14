@@ -171,6 +171,7 @@ public:
             Acoef[r][c] = 0.;
             Jcoef[r][c] = 0.;
         }
+        Acoef[r][1] = 1.;
         Jcoef[r][1] = r;
         b[r] = 0.;
     }

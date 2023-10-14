@@ -11,7 +11,7 @@ rm *.plt
 #--------------------------------------------------------------------------------------------------------
 
 # mpirun -n 9 ./esPIC -nPEx 3 -nPEy 3 -nCellx 10 -nCelly 10 -nPtcl 50000  -flux 100 -tEnd 2 -dt .01 -tPlot .1
-mpirun -n 1 ./esPIC -nPEx 1 -nPEy 1 -nCellx 2 -nCelly 2 -nPtcl 50000  -flux 200  -tEnd 4 -dt .01 -tPlot .2
+mpirun -n 3 ./esPIC -nPEx 3 -nPEy 1 -nCellx 10 -nCelly 10 -nPtcl 50000  -flux 200  -tEnd 4 -dt .01 -tPlot .2
 
 #--------------------------------------------------------------------------------------------------------
 # VALGRIND OPTION:

@@ -374,8 +374,19 @@ class mpiInfo
   }
 
 
-  
-  int pid(int i,int j) { return (i+1) + (j)*(nRealx+2); }  
+    // OPTIMIZATION alternate physical node storage scheme
+    // 22, 24, 26, 28, 30, < extra row needed for padding
+    // 21, 23, 25, 27, 29,
+    // 12, 14, 16, 18, 20,
+    // 11, 13, 15, 17, 19,
+    //  2,  4,  6,  8, 10, < every two rows are grouped together
+    //  1,  3,  5,  7,  9, <
+    //
+    // int pid(int i,int j) { return (i+1) + (j)*(nRealx+2);}   // Given i-j, return point ID.  Here i-j is the physical grid.
+    // The row/col numbers must include the candy-coating.
+  inline int pid(int i, int j ) {
+        return  j % 2 + (j / 2) * 2 * (nRealx + 1) + i * 2 + 1;
+    }
 
 };
 
