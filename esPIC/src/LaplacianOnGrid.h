@@ -77,6 +77,7 @@
 //
 
 #include "debug_utils.h"
+#include "contiguous_array.h"
 
 //  ==
 //  ||
@@ -93,8 +94,12 @@ public:
   VD x,y;
   int nRealx    , nRealy   , nField;
   double dx, dy;
-  VDD Acoef;
-  VII Jcoef ;
+
+  // OPTIMIZATION using contiguous arrays
+  // VDD Acoef;
+  // VII Jcoef ;
+  double** Acoef;
+  int** Jcoef;
   VD  phi ;  VD  b ;
   int bandwidth;
   int myPE;
@@ -143,12 +148,10 @@ public:
     b.resize(phi_len_padded);
     phi.resize(phi_len_padded);
 
-    Acoef.resize(phi_len_padded);
-    Jcoef.resize(phi_len_padded);
+    Acoef = arrayDouble(phi_len_padded, bandwidth + 1);
+    Jcoef = arrayInt(phi_len_padded, bandwidth + 1);
 
     for (int r = 1; r < phi_len_padded; ++r) {
-        Acoef[r].resize(bandwidth+1);
-        Jcoef[r].resize(bandwidth+1);
         phi[r] = 0.;
     }
     

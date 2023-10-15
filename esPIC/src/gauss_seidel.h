@@ -47,7 +47,7 @@ void GS_or_Jacobi(int max_iter , VD RHS, VD &Solution , mpiInfo &myMPI , int GSo
 
     //    rLOOP Solution[r] = 0.;
     tol       = 1.e-04;
-    
+
     // ====================================================
     // Begin Iterations
     // ====================================================
@@ -103,7 +103,7 @@ void GS_or_Jacobi(int max_iter , VD RHS, VD &Solution , mpiInfo &myMPI , int GSo
 	      
 	  }
 
-	rLOOP Solution[r] = SolutionNew[r];
+	Solution.swap(SolutionNew);
 
 	// ----------------------------------------------
 	// (4) Make note of the convergence state
