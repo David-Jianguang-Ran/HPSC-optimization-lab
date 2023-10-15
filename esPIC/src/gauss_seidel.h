@@ -26,8 +26,7 @@
   //  ||
   //  ==
 
-void GS_or_Jacobi(int max_iter , VD RHS, VD &Solution , mpiInfo &myMPI , int GSorJacobi, int &finalIterCount )
-  {
+void GS_or_Jacobi(int max_iter , VD RHS, VD &Solution , mpiInfo &myMPI , int GSorJacobi, int &finalIterCount ) {
     int converged, it_converged;
     int iter = 0;
     double newval;
@@ -36,97 +35,97 @@ void GS_or_Jacobi(int max_iter , VD RHS, VD &Solution , mpiInfo &myMPI , int GSo
     double tol;
 
     MPI_Status status;
-    int        tag = 0;
-    int        err;
-    int        global_converged;
-    int        zero = 0;
-    int        one  = 1;
-    
+    int tag = 0;
+    int err;
+    int global_converged;
+    int zero = 0;
+    int one = 1;
 
-    VD SolutionNew; SolutionNew.resize(Solution.size());
+
+    VD SolutionNew;
+    SolutionNew.resize(Solution.size());
 
     //    rLOOP Solution[r] = 0.;
-    tol       = 1.e-04;
+    tol = 1.e-04;
+    // OPTIMIZATION cache the inverse of diagnal in the unused space in the beginning of the row
+    for (int r = 1; r < phi_len_padded; ++r) Acoef[r][0] = 1.0 / Acoef[r][1];
 
     // ====================================================
     // Begin Iterations
     // ====================================================
-    
+
     converged = 0;
 
-    
-    while ( converged == 0 )
-      {
-	// ----------------------------------------------
-	// (1) Parallel communication on PE Boundaries
-	// ----------------------------------------------
-	
-	myMPI.ExchangeBoundaryInfo(Solution,b);
 
-	// ----------------------------------------------
-	// (2) Convergence
-	// ----------------------------------------------
-	
-	if ( ++iter > max_iter )
-	  {
-	    finalIterCount = iter;
-	    return;
-	  }
+    while (converged == 0) {
+        // ----------------------------------------------
+        // (1) Parallel communication on PE Boundaries
+        // ----------------------------------------------
 
-	max_delta    = 0.;  it_converged = 1;
+        myMPI.ExchangeBoundaryInfo(Solution, b);
 
-	// ----------------------------------------------
-	// (3) One Jacobi Iteration
-	// ----------------------------------------------
+        // ----------------------------------------------
+        // (2) Convergence
+        // ----------------------------------------------
 
-    for (int r = 1; r < phi_len_padded; ++r)
-	  {
+        if (++iter > max_iter) {
+            finalIterCount = iter;
+            return;
+        }
 
-	    
-	    // (3.1) Compute new guess for row r
+        max_delta = 0.;
+        it_converged = 1;
 
-	    newval = b[r];
-	    for ( int c = 2 ; c <= bandwidth ; ++c ) newval -=  Acoef[r][c] * Solution[Jcoef[r][c]];
-	    newval /= Acoef[r][1];
+        // ----------------------------------------------
+        // (3) One Jacobi Iteration
+        // ----------------------------------------------
 
-	    // (3.2) Convergence check
+        for (int r = 1; r < phi_len_padded; ++r) {
 
-	    cur_delta  = fabs(Solution[r] - newval);
 
-	    if ( cur_delta > tol ) it_converged = 0;
+            // (3.1) Compute new guess for row r
 
-	    // (3.3) Record new value in solution
+            newval = b[r];
+            for (int c = 2; c <= bandwidth; ++c)
+                newval -= Acoef[r][c] * Solution[Jcoef[r][c]];
+            newval *= Acoef[r][0];
 
-	    SolutionNew[r]       = newval;
+                // (3.2) Convergence check
 
-	    if ( GSorJacobi == 1 ) Solution[r] = newval;  // Gauss-Seidel, update Solution as we go
-	      
-	  }
+                cur_delta = fabs(Solution[r] - newval);
 
-	Solution.swap(SolutionNew);
+                if (cur_delta > tol) it_converged = 0;
 
-	// ----------------------------------------------
-	// (4) Make note of the convergence state
-	// ----------------------------------------------
-	
-	converged = it_converged;
+                // (3.3) Record new value in solution
 
-	// ----------------------------------------------
-	// (5) Gather convergence information from PEs
-	// ----------------------------------------------
+                SolutionNew[r] = newval;
 
-	int root = 0;
-	err = MPI_Reduce( &converged       , &global_converged, one , MPI_INT , MPI_MIN , zero , MPI_COMM_WORLD );
-	err = MPI_Bcast ( &global_converged,                    one , MPI_INT,            zero , MPI_COMM_WORLD );
-	converged = global_converged;
+                if (GSorJacobi == 1) Solution[r] = newval;  // Gauss-Seidel, update Solution as we go
 
-	if ( converged == 1 )
-	  {
-	    finalIterCount = iter;
-	    return;
-	  }
-	
-      }
+            }
 
-  }
+            Solution.swap(SolutionNew);
 
+            // ----------------------------------------------
+            // (4) Make note of the convergence state
+            // ----------------------------------------------
+
+            converged = it_converged;
+
+            // ----------------------------------------------
+            // (5) Gather convergence information from PEs
+            // ----------------------------------------------
+
+            int root = 0;
+            err = MPI_Reduce(&converged, &global_converged, one, MPI_INT, MPI_MIN, zero, MPI_COMM_WORLD);
+            err = MPI_Bcast(&global_converged, one, MPI_INT, zero, MPI_COMM_WORLD);
+            converged = global_converged;
+
+            if (converged == 1) {
+                finalIterCount = iter;
+                return;
+            }
+
+        }
+
+}
