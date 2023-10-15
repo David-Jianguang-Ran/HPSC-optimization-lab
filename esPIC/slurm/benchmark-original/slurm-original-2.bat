@@ -34,11 +34,15 @@ echo "|| Begin Execution of esPIC in slurm batch script."
 echo "||"
 echo "=="
 
+srun -n 16 ./esPIC-original -nPEx 4 -nPEy 4 -nCellx 20 -nCelly 20 -nPtcl 100000  -flux 1000  -tEnd 1 -dt .01 -tPlot .2 -noPlot >> original-benchmark-16.out
+
 srun -n 16 ./esPIC-original -nPEx 4 -nPEy 4 -nCellx 40 -nCelly 40 -nPtcl 100000  -flux 1000  -tEnd 1 -dt .01 -tPlot .2 -noPlot >> original-benchmark-16.out
 
 srun -n 16 ./esPIC-original -nPEx 4 -nPEy 4 -nCellx 80 -nCelly 80 -nPtcl 100000  -flux 1000  -tEnd 1 -dt .01 -tPlot .2 -noPlot >> original-benchmark-16.out
 
 srun -n 16 ./esPIC-original -nPEx 4 -nPEy 4 -nCellx 160 -nCelly 160 -nPtcl 100000  -flux 1000  -tEnd 1 -dt .01 -tPlot .2 -noPlot >> original-benchmark-16.out
+
+srun -n 16 ./esPIC-original -nPEx 4 -nPEy 4 -nCellx 320 -nCelly 320 -nPtcl 100000  -flux 1000  -tEnd 1 -dt .01 -tPlot .2 -noPlot >> original-benchmark-16.out
 
 echo "=="
 echo "||"
